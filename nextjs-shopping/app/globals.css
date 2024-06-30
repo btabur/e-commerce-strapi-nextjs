@@ -1,0 +1,15 @@
+@tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+  
+
+  .bg-one{
+    @apply bg-mycolor1 dark:bg-mycolor2 !important;
+  }
+  .text-one{
+    @apply text-mycolor2 dark:text-mycolor1 !important;
+  }
+
+  .validation-login {
+    @apply text-mycolor3 dark:text-mycolor3 !important
+  }

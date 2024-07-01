@@ -8,6 +8,8 @@ import { getCategories } from "@/actions/getCategories";
 import { Category } from "@/constans/type";
 import { ModeToggle } from "@/components/ModeToggle";
 import Link from "next/link";
+import NavSkeleton from "../Skeleton/NavSkeleton";
+import MobileMenu from "./MobileMenu";
 
 const Navbar = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -36,13 +38,16 @@ const Navbar = () => {
             <Cart />
             <UserMenu />
             <ModeToggle />
+            <div className="lg:hidden">
+              <MobileMenu categories={categories}/>
+            </div>
           </div>
         </div>
       </header>
       <nav className="hidden border-b border-one bg-one py-4 lg:flex py-y justify-center">
         <div className="hidden lg:flex gap-8">
           {loading ? (
-            <div>Loading</div> ): (
+           <NavSkeleton/> ): (
               categories.map((category)=> (
                 <Link href={`/category/ ${category.attributes.slug}`} key={category.id}>
                   {category.attributes.name}

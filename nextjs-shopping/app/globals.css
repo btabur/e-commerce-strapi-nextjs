@@ -16,3 +16,7 @@
   .border-one {
     @apply border-slate-300 dark:border-slate-500
   }
+
+  .ske-color {
+    @apply bg-slate-500 dark:bg-slate-100 !important
+  }

@@ -1,6 +1,6 @@
 "use client"
 import React from 'react'
-import { z } from "zod"
+import { boolean, z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import {
@@ -16,6 +16,14 @@ import { Input } from "@/components/ui/input"
 import { Button } from '@/components/ui/button'
 import { Label } from '@radix-ui/react-label'
 import Link from 'next/link'
+import { useStore } from 'zustand'
+import useAuthStore from '@/hooks/useAuth'
+import registerUser from '@/actions/register'
+import { startSession } from '@/lib/session'
+import { useToast } from '@/components/ui/use-toast'
+import { useRouter } from 'next/navigation'
+import { error } from 'console'
+import { Loader2Icon } from 'lucide-react'
 
 
 const formShema =z.object({
@@ -31,6 +39,9 @@ const formShema =z.object({
 })
 
 const CreateUserPage = () => {
+  const {loader,setLoader}= useAuthStore();
+  const {toast}= useToast();
+  const router = useRouter()
 
   const form = useForm<z.infer<typeof formShema>>({
     resolver:zodResolver(formShema),
@@ -41,7 +52,30 @@ const CreateUserPage = () => {
     }
   })
 
-  const onSubmit = ()=> {
+  const onSubmit = (data:z.infer<typeof formShema>)=> {
+    setLoader(true)
+
+    registerUser(data.username,data.email, data.password).then(
+      (resp)=> {
+        startSession(resp.user,resp.jwt)
+        toast({
+          variant:"success",
+          title:"hesap başarı ile oluşturuldu"
+        }),
+        setLoader(false),
+        router.push("/")
+      },
+      (error)=> {
+        setLoader(false),
+        toast({
+          title:"Birşeyler yanlış gitti",
+          variant:"destructive"
+        })
+        
+      }
+    ).finally(()=> {
+      setLoader(false)
+    })
 
   }
 
@@ -90,7 +124,9 @@ const CreateUserPage = () => {
           </FormItem>
         )}
       />
-      <Button className='w-full' type="submit">Register</Button>
+      <Button className='w-full' type="submit">
+        {loader ? <Loader2Icon className='animate-spin'/> : "Kayıt Ol"}
+      </Button>
     </form>
     <div className='mt-8 flex flex-col items-center gap-2'>
       <Label>

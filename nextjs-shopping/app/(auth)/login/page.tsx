@@ -16,6 +16,12 @@ import { Input } from "@/components/ui/input"
 import { Button } from '@/components/ui/button'
 import { Label } from '@radix-ui/react-label'
 import Link from 'next/link'
+import useAuthStore from '@/hooks/useAuth'
+import { useToast } from '@/components/ui/use-toast'
+import { useRouter } from 'next/navigation'
+import { Loader2Icon } from 'lucide-react'
+import loginUser from '@/actions/login'
+import { startSession } from '@/lib/session'
 
 
 const formShema =z.object({
@@ -28,6 +34,9 @@ const formShema =z.object({
 })
 
 const LoginPage = () => {
+  const {loader,setLoader}= useAuthStore();
+  const {toast}= useToast();
+  const router = useRouter()
 
   const form = useForm<z.infer<typeof formShema>>({
     resolver:zodResolver(formShema),
@@ -37,7 +46,30 @@ const LoginPage = () => {
     }
   })
 
-  const onSubmit = ()=> {
+  const onSubmit = (data:z.infer<typeof formShema>)=> {
+    setLoader(true)
+
+    loginUser(data.email, data.password).then(
+      (resp)=> {
+        startSession(resp.user,resp.jwt)
+        toast({
+          variant:"success",
+          title:"hesap başarı ile oluşturuldu"
+        }),
+        setLoader(false),
+        router.push("/")
+      },
+      (error)=> {
+        setLoader(false),
+        toast({
+          title:"Birşeyler yanlış gitti",
+          variant:"destructive"
+        })
+        
+      }
+    ).finally(()=> {
+      setLoader(false)
+    })
 
   }
 
@@ -72,7 +104,9 @@ const LoginPage = () => {
           </FormItem>
         )}
       />
-      <Button className='w-full' type="submit">Login</Button>
+      <Button className='w-full' type="submit">
+        {loader ? <Loader2Icon className='animate-spin'/> : "Giriş Yap"}
+      </Button>
     </form>
     <div className='mt-8 flex flex-col items-center gap-2'>
       <Label>
